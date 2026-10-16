@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kubedemoapp-deployment
+  name: week9-app
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
-      app: kubedemoapp
+      app: week9-app
   template:
     metadata:
       labels:
-        app: kubedemoapp
+        app: week9-app
     spec:
       containers:
-        - name: kubedemoapp
-          image: nandini9334/week8:kubeimage1 # use your Docker Hub image
+        - name: week9-app
+          image: komal0106/week9repo:latest
           ports:
-            - containerPort: 5050
+            - containerPort: 5000
