@@ -1,41 +1,76 @@
 pipeline {
     agent any
-    stages
-    {
+
+    environment {
+        DOCKER_USERNAME = "komal0106"
+        DOCKER_PASSWORD = "guddu2006"
+
+        IMAGE_NAME = "komal0106/week9repo"
+        IMAGE_TAG = "latest"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo "Checking out source code..."
+                checkout scm
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                echo "Build Docker Image"
-                bat "docker build -t kubdemoapp:v1 ."
+                echo "Building Docker Image..."
+                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
             }
         }
+
         stage('Docker Login') {
             steps {
-                  bat 'docker login -u komal0106 -p guddu2006'
-                }
-            }
-        stage('push Docker Image to Docker Hub') {
-            steps {
-                echo "push Docker Image to Docker Hub"
-                bat "docker tag kubdemoapp:v1 komal0106/week8:kubeimage1"               
-                    
-                bat "docker push komal0106/week8:kubeimage1"
-                
+                echo "Logging in to Docker Hub..."
+
+                bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
             }
         }
-        stage('Deploy to Kubernetes') { 
-            steps { 
-                    // apply deployment & service 
-                    bat 'kubectl apply -f deployment.yaml --validate=false' 
-                    bat 'kubectl apply -f service.yaml' 
-            } 
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                echo "Pushing Docker Image to Docker Hub..."
+
+                bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo "Deploying application to Kubernetes..."
+
+                bat "kubectl apply -f deployment.yaml --validate=false"
+                bat "kubectl apply -f service.yaml"
+            }
+        }
+
+        stage('Verify Kubernetes Deployment') {
+            steps {
+                echo "Checking Kubernetes resources..."
+
+                bat "kubectl get deployments"
+                bat "kubectl get pods"
+                bat "kubectl get services"
+            }
         }
     }
+
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo "PIPELINE COMPLETED SUCCESSFULLY!"
+            echo "Docker Image: %IMAGE_NAME%:%IMAGE_TAG%"
+            echo "Kubernetes deployment completed successfully!"
         }
+
         failure {
-            echo 'Pipeline failed. Please check the logs.'
+            echo "PIPELINE FAILED!"
+            echo "Please check the Jenkins console output."
         }
     }
 }
