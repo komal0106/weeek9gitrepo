@@ -1,16 +1,8 @@
+
 pipeline {
     agent any
 
-    environment {
-        DOCKER_USERNAME = "komal0106"
-        DOCKER_PASSWORD = "guddu2006"
-
-        IMAGE_NAME = "komal0106/week9repo"
-        IMAGE_TAG = "latest"
-    }
-
     stages {
-
         stage('Checkout') {
             steps {
                 echo "Checking out source code..."
@@ -20,31 +12,29 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker Image..."
-                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
+                echo "Build Docker Image"
+                bat "docker build -t weeek9image:v1 ."
             }
         }
 
         stage('Docker Login') {
             steps {
-                echo "Logging in to Docker Hub..."
-
-                bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
+                echo "Logging in to Docker Hub"
+                bat "docker login -u komal0106"
             }
         }
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                echo "Pushing Docker Image to Docker Hub..."
-
-                bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
+                echo "Push Docker Image to Docker Hub"
+                bat "docker tag weeek9image:v1 komal0106/weeek9image:latest"
+                bat "docker push komal0106/weeek9image:latest"
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                echo "Deploying application to Kubernetes..."
-
+                echo "Deploying application to Kubernetes"
                 bat "kubectl apply -f deployment.yaml --validate=false"
                 bat "kubectl apply -f service.yaml"
             }
@@ -52,8 +42,7 @@ pipeline {
 
         stage('Verify Kubernetes Deployment') {
             steps {
-                echo "Checking Kubernetes resources..."
-
+                echo "Checking Kubernetes resources"
                 bat "kubectl get deployments"
                 bat "kubectl get pods"
                 bat "kubectl get services"
@@ -63,14 +52,14 @@ pipeline {
 
     post {
         success {
-            echo "PIPELINE COMPLETED SUCCESSFULLY!"
-            echo "Docker Image: %IMAGE_NAME%:%IMAGE_TAG%"
-            echo "Kubernetes deployment completed successfully!"
+            echo 'PIPELINE COMPLETED SUCCESSFULLY!'
+            echo 'Docker Image: komal0106/weeek9image:latest'
+            echo 'Kubernetes deployment completed successfully!'
         }
 
         failure {
-            echo "PIPELINE FAILED!"
-            echo "Please check the Jenkins console output."
+            echo 'PIPELINE FAILED!'
+            echo 'Please check the logs.'
         }
     }
 }
