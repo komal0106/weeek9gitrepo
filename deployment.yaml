@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: week9-app
-          image: komal0106/weeek9image:latest
+          image: komal0106/week9repo:latest
           ports:
             - containerPort: 5000
